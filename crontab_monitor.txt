@@ -1,0 +1,6 @@
+SHELL=/bin/bash
+PATH="/usr/bin:/usr/local/bin/:$PATH"
+
+* * * * * /home/ubuntu/Proj-15/Slack/monitor.py >> /var/log/monitor.log
+5 0 * * * find /var/log/monitor.log -delete
+
