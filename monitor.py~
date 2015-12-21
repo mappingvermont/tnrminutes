@@ -11,6 +11,8 @@ import sys
 from slackclient import SlackClient
 
 try:
+#    Mikaela's token
+#    token = r'xoxp-2198482637-4145942825-16146661090-f56d96e2d5'
 
 #   my token
     token = r'FROM CONFIG'

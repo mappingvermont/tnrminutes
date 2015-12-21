@@ -1,0 +1,15 @@
+bufferToken = r'1/573a4791e1392dd1d310f2f9890dfd17'
+
+#    Mikaela's token
+#    token = r'xoxp-2198482637-4145942825-16146661090-f56d96e2d5'
+
+#   my token
+    slackToken = r'xoxp-16686260288-16685872082-16686597536-3b5de3d72a'
+
+USERS
+
+	    #Mikaela's
+	    #dmChannel = json.loads(sc.api_call("im.open", user="U0449TQQ9"))['channel']['id']
+	
+	    #Mine
+	    dmChannel = json.loads(sc.api_call("im.open", user="U0GL5RN2E"))['channel']['id']
