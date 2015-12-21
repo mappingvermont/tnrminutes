@@ -6,7 +6,8 @@ import os
 import ConfigParser
 
 cwd = os.getcwd()
-version = os.environ['TNRMINUTES_VERSION']
+#version = os.environ['TNRMINUTES_VERSION']
+version = 'DEV'
 
 Config = ConfigParser.ConfigParser()
 Config.read(os.path.join(cwd, 'config.ini'))
