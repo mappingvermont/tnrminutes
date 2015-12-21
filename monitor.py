@@ -8,6 +8,7 @@ import time
 import json
 import subprocess
 import sys
+import os
 from slackclient import SlackClient
 
 try:
@@ -16,7 +17,8 @@ try:
     token = r'FROM CONFIG'
     sc = SlackClient(token)
 
-    dbPath = r'/home/ubuntu/Proj-15/Slack/slack.db'
+    cwd = os.getcwd()
+    dbPath = os.path.join(cwd, 'slack.db')
     conn = sqlite3.connect(dbPath)
     curs = conn.cursor()
 
