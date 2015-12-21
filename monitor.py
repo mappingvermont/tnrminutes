@@ -1,98 +1,97 @@
 #!/usr/bin/python
-
-from bs4 import BeautifulSoup
-import urllib2
 import sqlite3
 import datetime
 import time
-import json
 import subprocess
 import sys
 import os
-from slackclient import SlackClient
+from scrapeMinutes import getMinuteData
+from postToSlack_and_Buffer import *
 
-try:
+# try:
 
-#   my token
-    token = r'FROM CONFIG'
-    sc = SlackClient(token)
+url = 'https://newrepublic.com/minutes/'
+#    print "Using version {}, we have slack token {}, user {} and buffer token {}".format(version, slackToken, slackUser, bufferToken)
 
-    cwd = os.getcwd()
-    dbPath = os.path.join(cwd, 'slack.db')
-    conn = sqlite3.connect(dbPath)
-    curs = conn.cursor()
+dbPath = os.path.join(cwd, 'slack.db')
+conn = sqlite3.connect(dbPath)
+curs = conn.cursor()
 
-    #CREATE TABLE minutes (id INTEGER PRIMARY KEY, title varchar(500), under40chars varchar(10), minutesdate real);
+minuteList = getMinuteData(url)
 
-     #testing try/except block
-#    raise ValueError('bad!')
+selectSQL = "SELECT minuteid, title FROM minutes;"
+curs.execute(selectSQL)
 
-    url= 'https://newrepublic.com/minutes'
-    page = urllib2.urlopen(url)
-    soup = BeautifulSoup(page.read(), "lxml")
+existingMinutes = {x:unicode(y) for (x,y) in curs.fetchall()}
 
-    titleList = soup.find_all("h1", {"class": "minute-title"})
+for minuteDict in minuteList:
+    try:
+        existingText = existingMinutes[minuteDict['minuteID']]
 
-    existingTitles = []
+        #Need to check here for an updated title, then call update function to buffer
+        if minuteDict['minuteText'] != existingText:
 
-    selectSQL = "SELECT title FROM minutes;"
-    curs.execute(selectSQL)
+            curs.execute("SELECT bufferid FROM minutes WHERE minuteid = ?;", (minuteDict['minuteID'], ))
+            updateBufferID = curs.fetchone()[0]
 
-    existingTitles = [unicode(x[0]) for x in curs.fetchall()]
+            newText = minuteDict['minuteText']+minuteDict['minuteURL']
+            bufferDict = updateBufferPost(updateBufferID, newText)
 
-    #print existingTitles
+            print "Updated existing post on buffer, success: {}".format(bufferDict['success'])
 
-    for title in titleList:
-        textVal = title.contents[0].text.strip()
+            curs.execute("UPDATE minutes SET title = ? WHERE minuteid = ?", (minuteDict['minuteText'], minuteDict['minuteID']))
+            conn.commit()
 
-        if textVal in existingTitles:
-            pass
-            #print 'Already in database'
         else:
+         #If the minuteID and title match, no reason to update an existing post
+            pass
+            
+        
+    #If we haven't already processed this minuteID
+    except KeyError:
+#        print minuteDict
 
-            if len(textVal) > 140:
-                under40 = 'No'
-            else:
-  	       under40 = 'Yes'
+        bufferDict = postBuffer(minuteDict)
 
-            insertSQL = "INSERT INTO minutes (title, under40chars, minutesdate) VALUES (?, ?, julianday(?))"
-            curs.execute(insertSQL, (textVal, under40, datetime.date.today()))
+        successText = bufferDict['success']
 
-#	    print type(textVal)
-#	    print textVal.encode('utf-8')
+        if successText:
+            print 'Added minuteid {} to buffer!'.format(minuteDict['minuteID'])
 
-	    dmChannel = json.loads(sc.api_call("im.open", user="FROM CONFIG"))['channel']['id']
+            bufferID = bufferDict['updates'][0]['id']
 
-	    #Text formatting, per slack specifications
-	    #https://api.slack.com/docs/formatting
+            #important due to api rates
+            time.sleep(1)
 
-	    text = textVal.encode('utf-8').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
- 	    print 'mail -a "Content-type: text/html; charset=UTF-8" -s "{0}" charlie.hofmann@gmail.com < /dev/null'.format(text)
-	   
- 	    sc.api_call("chat.postMessage", as_user="false", channel=dmChannel, text=text)
-	    sc.api_call("im.close", channel=dmChannel)
+            insertSQL = """INSERT INTO minutes (minuteid, title, minuteurl, imgurl, under120chars, bufferid, minutesdate) 
+                            VALUES (?, ?, ?, ?, ?, ?, julianday(?))"""
 
-	    subprocess.call('mail -a "Content-type: text/html; charset=UTF-8" -s "{0}" charlie.hofmann@gmail.com < /dev/null'.format(text), shell=True)
-	    print text
+            curs.execute(insertSQL, (minuteDict['minuteID'], minuteDict['minuteText'], minuteDict['minuteURL'], 
+                                      minuteDict['imgURL'], minuteDict['under120chars'], bufferID, datetime.date.today()))
 
-	    #important due to api rates
-	    time.sleep(2)
+            conn.commit()
 
-    #Delete old minutes from the system
-    curs.execute("DELETE FROM minutes WHERE julianday() - minutesdate > 3;")
+        else:
+            print bufferDict
+            print 'here'
+            subprocess.call('mail -s "bufferdict msg: {0}" charlie.hofmann@gmail.com < /dev/null'.format(bufferDict['message']), shell=True)
 
-    conn.commit()
 
-    #Check that the script is running all the way through, and email me
-    currentTime = datetime.datetime.now().time()
+#Delete old minutes from the system
+curs.execute("DELETE FROM minutes WHERE julianday() - minutesdate > 3;")
 
-    if currentTime.hour == 1 and currentTime.minute == 1:
-        subprocess.call('mail -s "minutes script works" charlie.hofmann@gmail.com < /dev/null', shell=True)
-    else:
-        pass
+conn.commit()
 
-except Exception as e:
-    exc_type, exc_obj, exc_tb = sys.exc_info()
-    print exc_type, exc_tb.tb_lineno
-    subprocess.call('mail -s "error in minutes script" charlie.hofmann@gmail.com < /dev/null', shell=True)
-    print 'Error in minutes script'
+#Check that the script is running all the way through, and email me
+currentTime = datetime.datetime.now().time()
+
+if currentTime.hour == 1 and currentTime.minute == 1:
+    subprocess.call('mail -s "minutes script works" charlie.hofmann@gmail.com < /dev/null', shell=True)
+else:
+    pass
+
+# except Exception as e:
+#     exc_type, exc_obj, exc_tb = sys.exc_info()
+#     print exc_type, exc_tb.tb_lineno
+#     subprocess.call('mail -s "error in minutes script" charlie.hofmann@gmail.com < /dev/null', shell=True)
+#     print 'Error in minutes script'
