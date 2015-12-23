@@ -7,7 +7,7 @@ import ConfigParser
 
 cwd = r'/home/ubuntu/Proj-15/tnrminutes'
 #version = os.environ['TNRMINUTES_VERSION']
-version = 'DEV'
+version = 'PROD'
 
 Config = ConfigParser.ConfigParser()
 Config.read(os.path.join(cwd, 'config.ini'))
