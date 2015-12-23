@@ -66,9 +66,8 @@ try:
                     time.sleep(1)
 
                 else:
-                    
-		            #insert fake buffer ID
-		            bufferID = '9999'
+                    #insert fake buffer ID
+                    bufferID = '9999'
                     print bufferDict
 
                 #Regardless of whether the buffer post was successful, add to database anyway
