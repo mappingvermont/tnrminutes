@@ -32,9 +32,9 @@ def postBuffer(minuteDict):
 	#GIF/image adds 24 chars
 	#Link adds 24 chars as well
 	if len(srcText) > 140:
-		postSlack('Did not add this to buffer; >140 chars: ', srcText)
+		postSlack('Did not add this to buffer; more than 140 chars: ', srcText)
 
-		return {'success': 'False', 'message': 'Too many chars for buffer'}
+		return {'success': False, 'message': 'Too many chars for buffer'}
 
 	elif len(srcText) > 112:
 		postSlack('Posted to buffer with only a link; too many chars for a photo: ', srcText)
