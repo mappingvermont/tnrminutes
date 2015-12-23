@@ -31,28 +31,16 @@ def postBuffer(minuteDict):
 
 	#GIF/image adds 24 chars
 	#Link adds 24 chars as well
-	if len(srcText) > 140:
-		postSlack('Did not add this to buffer; more than 140 chars: ', srcText)
+        postSlack('Posted to buffer with link and photo (if present): ', srcText)
 
-		return {'success': False, 'message': 'Too many chars for buffer'}
-
-	elif len(srcText) > 92:
-		postSlack('Posted to buffer with only a link; too many chars for a photo: ', srcText)
-
-		r = requests.post(tokenStr, data=data)
-		return r.json()
-
+	if minuteDict['imgURL']:
+		data['media[picture]'] = minuteDict['imgURL']
+		data['media[thumbnail]'] = minuteDict['imgURL']
 	else:
-		postSlack('Posted to buffer with link and photo (if present): ', srcText)
+		pass
 
-		if minuteDict['imgURL']:
-			data['media[picture]'] = minuteDict['imgURL']
-			data['media[thumbnail]'] = minuteDict['imgURL']
-		else:
-			pass
-
-		r = requests.post(tokenStr, data=data)
-		return r.json()
+	r = requests.post(tokenStr, data=data)
+	return r.json()
 
 def updateBufferPost(bufferID, newText):
 	r = requests.get('https://api.bufferapp.com/1/profiles.json?access_token={0}'.format(bufferToken))
