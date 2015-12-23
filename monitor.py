@@ -62,21 +62,24 @@ try:
                     print 'Added minuteid {} to buffer!'.format(minuteDict['minuteID'])
 
                     bufferID = bufferDict['updates'][0]['id']
-
                     #important due to api rates
                     time.sleep(1)
 
-                    insertSQL = """INSERT INTO minutes (minuteid, title, minuteurl, imgurl, under120chars, bufferid, minutesdate) 
-                                    VALUES (?, ?, ?, ?, ?, ?, julianday(?))"""
-
-                    curs.execute(insertSQL, (minuteDict['minuteID'], minuteDict['minuteText'], minuteDict['minuteURL'], 
-                                              minuteDict['imgURL'], minuteDict['under120chars'], bufferID, datetime.date.today()))
-
-                    conn.commit()
-
                 else:
+		
+		    #insert fake buffer ID
+		    bufferID = '9999'
                     print bufferDict
-                    subprocess.call('mail -s "bufferdict msg: {0}" charlie.hofmann@gmail.com < /dev/null'.format(bufferDict['message']), shell=True)
+
+                #Regardless of whether the buffer post was successful, add to database anyway
+                #we don't want to keep trying and failing to post this to buffer
+                insertSQL = """INSERT INTO minutes (minuteid, title, minuteurl, imgurl, under120chars, bufferid, minutesdate) 
+                                VALUES (?, ?, ?, ?, ?, ?, julianday(?))"""
+
+                curs.execute(insertSQL, (minuteDict['minuteID'], minuteDict['minuteText'], minuteDict['minuteURL'],
+                                          minuteDict['imgURL'], minuteDict['under120chars'], bufferID, datetime.date.today()))
+
+                conn.commit()
 
 
         #Delete old minutes from the system

@@ -1,7 +1,6 @@
 todo
 ---
 
-add option to read google doc for mikaela's config
 figure out how to remove height and width stuff from url
 get access to lefrak's buffer account
 
