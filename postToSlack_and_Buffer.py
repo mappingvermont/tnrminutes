@@ -36,7 +36,7 @@ def postBuffer(minuteDict):
 
 		return {'success': False, 'message': 'Too many chars for buffer'}
 
-	elif len(srcText) > 112:
+	elif len(srcText) > 92:
 		postSlack('Posted to buffer with only a link; too many chars for a photo: ', srcText)
 
 		r = requests.post(tokenStr, data=data)
