@@ -5,7 +5,7 @@ import subprocess
 import os
 import ConfigParser
 
-cwd = os.getcwd()
+cwd = r'/home/ubuntu/Proj-15/tnrminutes'
 #version = os.environ['TNRMINUTES_VERSION']
 version = 'DEV'
 
