@@ -2,3 +2,4 @@ config.ini
 *~
 slack.db
 *.pyc
+*.json
