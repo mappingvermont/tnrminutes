@@ -31,7 +31,7 @@ def postBuffer(minuteDict):
 
 	#GIF/image adds 24 chars
 	#Link adds 24 chars as well
-        postSlack('Posted to buffer with link and photo (if present): ', srcText)
+        postSlack('Posted to buffer: ', srcText)
 
 	if minuteDict['imgURL']:
 		data['media[picture]'] = minuteDict['imgURL']
