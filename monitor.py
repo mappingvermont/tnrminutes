@@ -49,10 +49,8 @@ try:
             
         #If we haven't already processed this minuteID
         except KeyError:
-    #        print minuteDict
 
             bufferDict = postBuffer(minuteDict)
-
             successText = bufferDict['success']
 
             if successText:
@@ -73,13 +71,11 @@ try:
 
             else:
                 print bufferDict
-                print 'here'
                 subprocess.call('mail -s "bufferdict msg: {0}" charlie.hofmann@gmail.com < /dev/null'.format(bufferDict['message']), shell=True)
 
 
     #Delete old minutes from the system
     curs.execute("DELETE FROM minutes WHERE julianday() - minutesdate > 3;")
-
     conn.commit()
 
     #Check that the script is running all the way through, and email me
