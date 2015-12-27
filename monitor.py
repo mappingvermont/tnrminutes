@@ -82,13 +82,14 @@ try:
 
 
         #Delete old minutes from the system
-        curs.execute("DELETE FROM minutes WHERE julianday() - minutesdate > 3;")
+        curs.execute("DELETE FROM minutes WHERE julianday() - minutesdate > 10;")
         conn.commit()
 
         #Check that the script is running all the way through, and email me
         currentTime = datetime.datetime.now().time()
 
         if currentTime.hour == 1 and currentTime.minute == 1:
+            print 'minutes script works'
             subprocess.call('mail -s "minutes script works" charlie.hofmann@gmail.com < /dev/null', shell=True)
         else:
             pass
