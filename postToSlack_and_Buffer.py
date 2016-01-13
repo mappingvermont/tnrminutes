@@ -4,10 +4,10 @@ import json
 import subprocess
 import os
 import ConfigParser
+import datetime
 
-cwd = r'/home/ubuntu/Proj-15/tnrminutes'
-#version = os.environ['TNRMINUTES_VERSION']
-version = 'PROD'
+cwd = r'/home/charlie/Proj-15/tnrminutes'
+version = 'DEV'
 
 Config = ConfigParser.ConfigParser()
 Config.read(os.path.join(cwd, 'config.ini'))
@@ -25,13 +25,15 @@ def postBuffer(minuteDict):
 	tokenStr = 'https://api.bufferapp.com/1/updates/create.json?access_token={0}'.format(bufferToken)
 
 	data = {'profile_ids[0]': [idVal],
-			'text': minuteDict['minuteText'] + ' ' + minuteDict['minuteURL']}
+			'text': minuteDict['minuteText'] + ' ' + minuteDict['minuteURL'],
+			'scheduled_at':  
+			}
 
 	srcText = minuteDict['minuteText']
 
 	#GIF/image adds 24 chars
 	#Link adds 24 chars as well
-        postSlack('Posted to buffer: ', srcText)
+    postSlack('Posted to buffer: ', srcText)
 
 	if minuteDict['imgURL']:
 		data['media[picture]'] = minuteDict['imgURL']

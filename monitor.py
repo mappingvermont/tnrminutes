@@ -55,22 +55,31 @@ try:
             #If we haven't already processed this minuteID
             except KeyError:
 
-                bufferDict = postBuffer(minuteDict)
-                successText = bufferDict['success']
+                #Check if the app is running before posting something to buffer
+                if configDict['app_running'].lower() == 'true':
 
-                if successText:
-                    #print 'Added minuteid {} to buffer!'.format(minuteDict['minuteID'])
+                    bufferDict = postBuffer(minuteDict)
+                    successText = bufferDict['success']
 
-                    bufferID = bufferDict['updates'][0]['id']
-                    #important due to api rates
-                    time.sleep(1)
+                    if successText:
+                        #print 'Added minuteid {} to buffer!'.format(minuteDict['minuteID'])
 
+                        bufferID = bufferDict['updates'][0]['id']
+                        #important due to api rates
+                        time.sleep(1)
+
+                    else:
+                        #insert fake buffer ID
+                        bufferID = '9999'
+                        print bufferDict
+
+                #If app isn't running, don't post it, but do want to add it to database
                 else:
-                    #insert fake buffer ID
-                    bufferID = '9999'
-                    print bufferDict
+                    pass
+                    #print 'app disabled by google doc'
 
-                #Regardless of whether the buffer post was successful, add to database anyway
+                #Regardless of whether the buffer post was successful, or if the app is running,
+                #add to database anyway
                 #we don't want to keep trying and failing to post this to buffer
                 insertSQL = """INSERT INTO minutes (minuteid, title, minuteurl, imgurl, under120chars, bufferid, minutesdate) 
                                 VALUES (?, ?, ?, ?, ?, ?, julianday(?))"""
@@ -94,9 +103,6 @@ try:
         else:
             pass
 
-    else:
-        pass
-        #print 'app disabled by google doc'
 
 except Exception as e:
     exc_type, exc_obj, exc_tb = sys.exc_info()
