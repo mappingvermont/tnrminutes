@@ -24,9 +24,13 @@ def postBuffer(minuteDict):
 
 	tokenStr = 'https://api.bufferapp.com/1/updates/create.json?access_token={0}'.format(bufferToken)
 
+	currentTime = datetime.datetime.now()
+	offset = datetime.timedelta(hours=4)
+	postTime = currentTime + offset
+
 	data = {'profile_ids[0]': [idVal],
 			'text': minuteDict['minuteText'] + ' ' + minuteDict['minuteURL'],
-			'scheduled_at':  
+			'scheduled_at':  postTime.isoformat()
 			}
 
 	srcText = minuteDict['minuteText']
