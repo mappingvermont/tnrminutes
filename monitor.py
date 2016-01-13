@@ -59,7 +59,7 @@ try:
                 successText = bufferDict['success']
 
                 if successText:
-                    print 'Added minuteid {} to buffer!'.format(minuteDict['minuteID'])
+                    #print 'Added minuteid {} to buffer!'.format(minuteDict['minuteID'])
 
                     bufferID = bufferDict['updates'][0]['id']
                     #important due to api rates
@@ -82,7 +82,7 @@ try:
 
 
         #Delete old minutes from the system
-        curs.execute("DELETE FROM minutes WHERE julianday() - minutesdate > 10;")
+        curs.execute("DELETE FROM minutes WHERE julianday() - minutesdate > 100;")
         conn.commit()
 
         #Check that the script is running all the way through, and email me
@@ -95,7 +95,8 @@ try:
             pass
 
     else:
-        print 'app disabled by google doc'
+        pass
+        #print 'app disabled by google doc'
 
 except Exception as e:
     exc_type, exc_obj, exc_tb = sys.exc_info()
