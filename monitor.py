@@ -12,81 +12,79 @@ from checkGoogleDoc import checkAppStatus
 try:
 
     configDict = checkAppStatus()
-    
-    if configDict['app_running'].lower() == 'true':
 
-        url = 'https://newrepublic.com/minutes/'
-        #    print "Using version {}, we have slack token {}, user {} and buffer token {}".format(version, slackToken, slackUser, bufferToken)
+    url = 'https://newrepublic.com/minutes/'
+    #    print "Using version {}, we have slack token {}, user {} and buffer token {}".format(version, slackToken, slackUser, bufferToken)
 
-        dbPath = os.path.join(cwd, 'slack.db')
-        conn = sqlite3.connect(dbPath)
-        curs = conn.cursor()
+    dbPath = os.path.join(cwd, 'slack.db')
+    conn = sqlite3.connect(dbPath)
+    curs = conn.cursor()
 
-        minuteList = getMinuteData(url)
+    minuteList = getMinuteData(url)
 
-        selectSQL = "SELECT minuteid, title FROM minutes;"
-        curs.execute(selectSQL)
+    selectSQL = "SELECT minuteid, title FROM minutes;"
+    curs.execute(selectSQL)
 
-        existingMinutes = {x:unicode(y) for (x,y) in curs.fetchall()}
+    existingMinutes = {x:unicode(y) for (x,y) in curs.fetchall()}
 
-        for minuteDict in minuteList:
-            try:
-                existingText = existingMinutes[minuteDict['minuteID']]
+    for minuteDict in minuteList:
+        try:
+            existingText = existingMinutes[minuteDict['minuteID']]
 
-                #Need to check here for an updated title, then call update function to buffer
-                if minuteDict['minuteText'] != existingText:
+            #Need to check here for an updated title, then call update function to buffer
+            if minuteDict['minuteText'] != existingText:
 
-                    curs.execute("SELECT bufferid FROM minutes WHERE minuteid = ?;", (minuteDict['minuteID'], ))
-                    updateBufferID = curs.fetchone()[0]
+                curs.execute("SELECT bufferid FROM minutes WHERE minuteid = ?;", (minuteDict['minuteID'], ))
+                updateBufferID = curs.fetchone()[0]
 
-                    newText = minuteDict['minuteText']+minuteDict['minuteURL']
-                    bufferDict = updateBufferPost(updateBufferID, newText)
+                newText = minuteDict['minuteText']+minuteDict['minuteURL']
+                bufferDict = updateBufferPost(updateBufferID, newText)
 
-                    print "Updated existing post on buffer, success: {}".format(bufferDict['success'])
+                print "Updated existing post on buffer, success: {}".format(bufferDict['success'])
 
-                    curs.execute("UPDATE minutes SET title = ? WHERE minuteid = ?", (minuteDict['minuteText'], minuteDict['minuteID']))
-                    conn.commit()
-
-                else:
-                 #If the minuteID and title match, no reason to update an existing post
-                    pass
-                
-            
-            #If we haven't already processed this minuteID
-            except KeyError:
-
-                #Check if the app is running before posting something to buffer
-                if configDict['app_running'].lower() == 'true':
-
-                    bufferDict = postBuffer(minuteDict)
-                    successText = bufferDict['success']
-
-                    if successText:
-                        #print 'Added minuteid {} to buffer!'.format(minuteDict['minuteID'])
-
-                        bufferID = bufferDict['updates'][0]['id']
-                        #important due to api rates
-                        time.sleep(1)
-
-                    else:
-                        #insert fake buffer ID
-                        bufferID = '9999'
-                        print bufferDict
-
-                #If app isn't running, don't post it, but do want to add it to database
-                else:
-                    print 'Found new post, but app turned off'
-
-                #Regardless of whether the buffer post was successful, or if the app is running,
-                #add to database anyway
-                #we don't want to keep trying and failing to post this to buffer
-                insertSQL = """INSERT INTO minutes (minuteid, title, minuteurl, imgurl, under120chars, bufferid, minutesdate) 
-                                VALUES (?, ?, ?, ?, ?, ?, julianday(?))"""
-
-                curs.execute(insertSQL, (minuteDict['minuteID'], minuteDict['minuteText'], minuteDict['minuteURL'],
-                                          minuteDict['imgURL'], minuteDict['under120chars'], bufferID, datetime.date.today()))
-
+                curs.execute("UPDATE minutes SET title = ? WHERE minuteid = ?", (minuteDict['minuteText'], minuteDict['minuteID']))
                 conn.commit()
+
+            else:
+             #If the minuteID and title match, no reason to update an existing post
+                pass
+            
+        
+        #If we haven't already processed this minuteID
+        except KeyError:
+
+            #Check if the app is running before posting something to buffer
+            if configDict['app_running'].lower() == 'true':
+
+                bufferDict = postBuffer(minuteDict)
+                successText = bufferDict['success']
+
+                if successText:
+                    #print 'Added minuteid {} to buffer!'.format(minuteDict['minuteID'])
+
+                    bufferID = bufferDict['updates'][0]['id']
+                    #important due to api rates
+                    time.sleep(1)
+
+                else:
+                    #insert fake buffer ID
+                    bufferID = '9999'
+                    print bufferDict
+
+            #If app isn't running, don't post it, but do want to add it to database
+            else:
+                print 'Found new post, but app turned off'
+
+            #Regardless of whether the buffer post was successful, or if the app is running,
+            #add to database anyway
+            #we don't want to keep trying and failing to post this to buffer
+            insertSQL = """INSERT INTO minutes (minuteid, title, minuteurl, imgurl, under120chars, bufferid, minutesdate) 
+                            VALUES (?, ?, ?, ?, ?, ?, julianday(?))"""
+
+            curs.execute(insertSQL, (minuteDict['minuteID'], minuteDict['minuteText'], minuteDict['minuteURL'],
+                                      minuteDict['imgURL'], minuteDict['under120chars'], bufferID, datetime.date.today()))
+
+            conn.commit()
 
 
         #Delete old minutes from the system
