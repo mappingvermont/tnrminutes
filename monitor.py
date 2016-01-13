@@ -75,8 +75,7 @@ try:
 
                 #If app isn't running, don't post it, but do want to add it to database
                 else:
-                    pass
-                    #print 'app disabled by google doc'
+                    print 'Found new post, but app turned off'
 
                 #Regardless of whether the buffer post was successful, or if the app is running,
                 #add to database anyway

@@ -6,8 +6,8 @@ import os
 import ConfigParser
 import datetime
 
-cwd = r'/home/charlie/Proj-15/tnrminutes'
-version = 'DEV'
+cwd = r'/home/ubuntu/Proj-15/tnrminutes'
+version = 'PROD'
 
 Config = ConfigParser.ConfigParser()
 Config.read(os.path.join(cwd, 'config.ini'))
@@ -37,7 +37,7 @@ def postBuffer(minuteDict):
 
 	#GIF/image adds 24 chars
 	#Link adds 24 chars as well
-    postSlack('Posted to buffer: ', srcText)
+        postSlack('Posted to buffer: ', srcText)
 
 	if minuteDict['imgURL']:
 		data['media[picture]'] = minuteDict['imgURL']
