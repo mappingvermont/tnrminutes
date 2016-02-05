@@ -56,7 +56,8 @@ try:
             #Check if the app is running before posting something to buffer
             if configDict['app_running'].lower() == 'true':
 
-                bufferDict = postBuffer(minuteDict)
+                hourOffset = int(configDict['hour_offset'])
+                bufferDict = postBuffer(minuteDict, hourOffset)
                 successText = bufferDict['success']
 
                 if successText:
@@ -74,6 +75,7 @@ try:
             #If app isn't running, don't post it, but do want to add it to database
             else:
                 print 'Found new post, but app turned off'
+                bufferID = '9999'
 
             #Regardless of whether the buffer post was successful, or if the app is running,
             #add to database anyway
@@ -104,5 +106,5 @@ try:
 except Exception as e:
     exc_type, exc_obj, exc_tb = sys.exc_info()
     print exc_type, exc_tb.tb_lineno
-    subprocess.call('mail -s "error in minutes script" charlie.hofmann@gmail.com < /dev/null', shell=True)
+    subprocess.call('mail -s "error in minutes script {0}" charlie.hofmann@gmail.com < /dev/null'.format(exc_type), shell=True)
     print 'Error in minutes script'

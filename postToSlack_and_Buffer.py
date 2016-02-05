@@ -16,7 +16,7 @@ slackToken = Config.get(version, 'slackToken')
 slackUser = Config.get(version, 'slackUser')
 bufferToken = Config.get(version, 'bufferToken')
 
-def postBuffer(minuteDict):
+def postBuffer(minuteDict, hourOffset):
 	
 	r = requests.get('https://api.bufferapp.com/1/profiles.json?access_token={0}'.format(bufferToken))
 
@@ -24,9 +24,9 @@ def postBuffer(minuteDict):
 
 	tokenStr = 'https://api.bufferapp.com/1/updates/create.json?access_token={0}'.format(bufferToken)
 
-	currentTime = datetime.datetime.now()
-	offset = datetime.timedelta(hours=4)
-	postTime = currentTime + offset
+	currentTime = datetime.datetime.utcnow()
+	offsetTimeDelta = datetime.timedelta(hours=hourOffset)
+	postTime = currentTime + offsetTimeDelta
 
 	data = {'profile_ids[0]': [idVal],
 			'text': minuteDict['minuteText'] + ' ' + minuteDict['minuteURL'],
