@@ -12,7 +12,7 @@ def checkAppStatus():
 
     gc = gspread.authorize(credentials)
 
-    wks = gc.open("tnrminutes_config").sheet1
+    wks = gc.open("Slackbot").sheet1
 
     valuesList = wks.get_all_values()
     valuesDict = {x:y for (x,y) in valuesList}
