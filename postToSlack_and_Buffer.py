@@ -49,13 +49,16 @@ def postBuffer(minuteDict, hourOffset):
 	return r.json()
 
 def updateBufferPost(bufferID, newText):
-	r = requests.get('https://api.bufferapp.com/1/profiles.json?access_token={0}'.format(bufferToken))
+	r = requests.get('https://api.bufferapp.com/1/updates/{1}.json?access_token={0}'.format(bufferToken, bufferID))
 
-	idVal = r.json()[0]['id']
+	timeScheduled  = r.json()[0]['due_at']
 
 	tokenStr = 'https://api.bufferapp.com/1/updates/{1}/update.json?access_token={0}'.format(bufferToken, bufferID)
 
-	data = {'text': newText}
+	data = {
+                'text': newText,
+                'scheduled_at': timeScheduled
+                }
 
 	r = requests.post(tokenStr, data=data)
 	return r.json()
