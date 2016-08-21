@@ -40,7 +40,7 @@ def postBuffer(minuteDict, hourOffset):
 	#GIF/image adds 24 chars
 	#Link adds 24 chars as well
 	# Post to slack that we've added this minute to buffer
-    postSlack('Posted to buffer: ', srcText)
+        postSlack('Posted to buffer: ', srcText)
 
     # If there's an image associated, add it to the payload
 	if minuteDict['imgURL']:
